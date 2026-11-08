@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm Tra Live Tín Hiệu Cổng Game</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; background: #f8fafc; }
+        
+        header { background: #ffffff; border-bottom: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 40; padding: 14px 0; }
+        .header-container { max-width: 1200px; margin: 0 auto; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 20px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+        
+        .hero-section { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white; padding: 48px 16px; text-align: center; border-bottom: 4px solid #3b82f6; }
+        .hero-title { font-size: 32px; font-weight: 900; margin-bottom: 12px; letter-spacing: -0.03em; }
+        .hero-desc { font-size: 15px; color: #bfdbfe; max-width: 600px; margin: 0 auto 24px; line-height: 1.6; }
+        .stats-banner { display: inline-flex; gap: 24px; background: rgba(0,0,0,0.2); padding: 10px 24px; border-radius: 9999px; font-size: 13px; font-weight: 600; margin-bottom: 24px; }
+        .stat-item { display: flex; align-items: center; gap: 6px; }
+        .live-dot-green { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse 1s infinite; }
+        
+        .btn-group { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .btn-check { border: none; padding: 16px 40px; font-weight: 800; border-radius: 9999px; cursor: pointer; box-shadow: 0 10px 25px -5px rgba(255,255,255,0.3); transition: all 0.2s; font-size: 16px; background: #ffffff; color: #2563eb; }
+        .btn-check:hover { transform: scale(1.03); box-shadow: 0 10px 30px rgba(255,255,255,0.4); }
+        
+        .btn-support { border: 2px solid rgba(255, 255, 255, 0.4); padding: 14px 36px; font-weight: 700; border-radius: 9999px; cursor: pointer; transition: all 0.2s; font-size: 16px; background: transparent; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; }
+        .btn-support:hover { background: rgba(255, 255, 255, 0.1); border-color: white; transform: scale(1.03); }
+        
+        .scan-wrapper { max-width: 700px; margin: -32px auto 0; padding: 0 16px; width: 100%; position: relative; z-index: 30; }
+        .scan-box { background: white; border: 1px solid #bfdbfe; padding: 32px; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); text-align: center; display: none; }
+        .spinner { width: 36px; height: 36px; border: 4px solid #2563eb; border-top-color: transparent; border-radius: 50%; display: inline-block; animation: spin 1s linear infinite; margin-bottom: 12px; }
+        .loading-text { color: #2563eb; font-weight: 700; animation: pulse 1.5s infinite; }
+        .result-box { background: #ffffff; border: 2px solid #2563eb; padding: 36px 24px; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(37,99,235,0.25); text-align: center; display: none; }
+        .success-icon { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #dcfce7; color: #16a34a; font-size: 20px; font-weight: bold; margin-bottom: 16px; }
+        
+        .logo-neon { font-size: 44px; font-weight: 950; font-style: italic; letter-spacing: -0.06em; margin-bottom: 12px; cursor: pointer; user-select: none; display: inline-block; text-shadow: 0 0 20px rgba(59,130,246,0.3); }
+        .logo-blue-light { color: #3b82f6; }
+        .logo-blue-dark { color: #1d4ed8; }
+        
+        .result-title { font-size: 20px; font-weight: 800; color: #1e3a8a; margin-bottom: 6px; text-transform: uppercase; }
+        .result-desc { color: #475569; margin-bottom: 24px; font-size: 15px; }
+        .btn-cta { display: inline-block; background: linear-gradient(to right, #2563eb, #1d4ed8); color: white; font-weight: 800; font-size: 16px; padding: 14px 44px; border-radius: 14px; text-decoration: none; box-shadow: 0 8px 20px rgba(37,99,235,0.35); transition: all 0.2s; }
+        .btn-cta:hover { transform: scale(1.02); box-shadow: 0 10px 25px rgba(37,99,235,0.45); }
+        
+        main { max-width: 1200px; margin: 0 auto; padding: 40px 16px; width: 100%; flex-grow: 1; position: relative; }
+        .section-title-box { border-left: 4px solid #2563eb; padding-left: 12px; margin-bottom: 24px; }
+        .section-title { font-size: 20px; font-weight: 800; color: #0f172a; }
+        .section-subtitle { font-size: 12px; color: #64748b; margin-top: 2px; }
+        
+        .grid-container-wrapper { position: relative; }
+        .grid-overlay { position: absolute; inset: 0; background: rgba(248, 250, 252, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 16px; padding: 24px; text-align: center; }
+        .overlay-card { background: white; padding: 24px 32px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; max-width: 400px; }
+        .overlay-title { font-weight: 800; font-size: 16px; color: #1e293b; margin-bottom: 6px; }
+        .overlay-desc { font-size: 12px; color: #64748b; }
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; opacity: 0.15; pointer-events: none; transition: all 0.4s; }
+        @media (min-width: 768px) { .grid-container { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(4, 1fr); } }
+        
+        .game-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.3s; position: relative; }
+        .game-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); border-color: #93c5fd; }
+        
+        .rank-badge { position: absolute; top: 8px; left: 8px; background: #2563eb; color: white; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px; z-index: 10; }
+        .game-card:nth-child(1) .rank-badge { background: #dc2626; }
+        .game-card:nth-child(2) .rank-badge { background: #ea580c; }
+        .game-card:nth-child(3) .rank-badge { background: #d97706; }
+
+        .img-container { width: 100%; aspect-ratio: 1/1; background: #f8fafc; border-radius: 8px; margin-bottom: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #f1f5f9; position: relative; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .img-fallback { position: absolute; inset: 0; background: #eff6ff; display: flex; align-items: center; justify-content: center; color: #3b82f6; font-size: 12px; font-weight: 700; padding: 8px; text-transform: uppercase; text-align: center; }
+        
+        .game-name { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .time-badge { background: #fffbeb; border: 1px solid #fde68a; color: #b45309; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 9999px; display: inline-block; margin-bottom: 8px; }
+        .rate-label { font-size: 11px; color: #64748b; }
+        .rate-value { font-size: 18px; font-weight: 900; color: #2563eb; }
+        
+        .admin-panel { background: #0f172a; color: #f8fafc; padding: 24px 0; border-top: 4px solid #2563eb; margin-top: auto; display: none; position: relative; }
+        .admin-container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 12px; margin-bottom: 16px; }
+        .admin-title { font-size: 14px; font-weight: 700; color: #60a5fa; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; }
+        .live-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; display: inline-block; animation: pulse 1s infinite; }
+        .btn-close-admin { background: #dc2626; color: white; border: none; padding: 6px 14px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .btn-close-admin:hover { background: #b91c1c; }
+        
+        .admin-box { background: #1e293b; border: 1px solid #334155; padding: 24px; border-radius: 16px; display: flex; flex-direction: column; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+        .form-group input { width: 100%; background: #020617; border: 1px solid #334155; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: white; outline: none; }
+        .form-group input:focus { border-color: #2563eb; }
+        
+        .flex-input { display: flex; gap: 8px; }
+        .btn-admin { background: #2563eb; color: white; border: none; font-weight: 700; padding: 0 16px; border-radius: 8px; cursor: pointer; font-size: 13px; white-space: nowrap; }
+        .btn-admin:hover { background: #1d4ed8; }
+        
+        .output-box { background: #020617; border: 1px solid #1e3a8a; padding: 12px; border-radius: 8px; margin-top: 10px; display: none; }
+        .output-title { font-size: 11px; font-weight: 700; color: #60a5fa; display: block; margin-bottom: 4px; }
+        .output-link { color: #4ade80; font-family: monospace; font-size: 12px; word-break: break-all; cursor: pointer; user-select: all; background: #0f172a; padding: 8px; border-radius: 4px; border: 1px solid #1e293b; }
+        
+        footer { background: white; text-align: center; padding: 20px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1>Hệ Thống Quét Tín Hiệu Live</h1>
+            <div style="font-size: 12px; color: #64748b; font-weight: 600;">Cập nhật: Mới nhất</div>
+        </div>
+    </header>
+
+    <section class="hero-section">
+        <h2 class="hero-title">Dò Khung Giờ & Tỷ Lệ Cổng Nhả</h2>
+        <p class="hero-desc">Công cụ quét tự động dựa trên thuật toán AI giúp phát hiện cổng trò chơi đang có tỷ lệ hoàn trả cao nhất thị trường.</p>
+        <div class="stats-banner">
+            <div class="stat-item"><span class="live-dot-green"></span> Hệ thống: Ổn định</div>
+            <div class="stat-item">👥 Đang quét: 3,842 người</div>
+        </div>
+        <div class="btn-group">
+            <button id="btn-check" class="btn-check">⚡ BẮT ĐẦU QUÉT TÍN HIỆU NGAY</button>
+            <a id="btn-support" href="https://t.me" target="_blank" class="btn-support">💬 Liên Hệ Hỗ Trợ</a>
+        </div>
+    </section>
+
+    <div id="scan-container" class="scan-wrapper">
+        <div id="scan-loading" class="scan-box">
+            <div class="spinner"></div>
+            <p class="loading-text">Đang đồng bộ máy chủ và dò tín hiệu cổng nhả...</p>
+        </div>
+        
+        <div id="scan-result" class="result-box">
+            <div class="success-icon">✓</div>
+            <h3 class="result-title">PHÁT HIỆN CỔNG GAME TỐT NHẤT TOÀN MẠNG!</h3>
+            <div id="logo-click" class="logo-neon">
+                <span class="logo-blue-light">XX</span><span class="logo-blue-dark">88</span>
+            </div>
+            <p class="result-desc">Hệ thống ghi nhận cổng game phía trên đang đạt đỉnh tỷ lệ nhả thưởng.</p>
+            <a id="cta-link" href="#" target="_blank" class="btn-cta">🎰 ĐĂNG KÝ THAM GIA NHẬN LỘC</a>
+        </div>
+    </div>
+
+    <main>
+        <div class="section-title-box">
+            <h2 class="section-title">DANH SÁCH GAME ĐANG VÀO KHUNG GIỜ VÀNG</h2>
+            <p class="section-subtitle">Xếp hạng theo tỉ lệ nhả cao nhất - Tự động cập nhật lại mỗi 10 phút</p>
+        </div>
+        <div class="grid-container-wrapper">
+            <div id="grid-lock-overlay" class="grid-overlay">
+                <div class="overlay-card">
+                    <div class="overlay-title">🔒 Dữ Liệu Đang Khóa</div>
+                    <p class="overlay-desc">Vui lòng bấm nút <strong>"Bắt Đầu Quét Tín Hiệu Ngay"</strong> ở phía trên để mở khóa xem bảng xếp hạng chi tiết tỉ lệ nhả và khung giờ vàng.</p>
+                </div>
+            </div>
+            <div id="game-grid" class="grid-container"></div>
+        </div>
+    </main>
+
+    <section id="admin-panel" class="admin-panel">
+        <div class="admin-container">
+            <div class="admin-header">
+                <div class="admin-title"><span class="live-dot"></span> BẢNG ĐIỀU KHIỂN ĐẠI LÝ ẨN</div>
+                <button id="btn-close-admin" class="btn-close-admin">✕ Đóng bảng điều khiển</button>
+            </div>
+            <div class="admin-box">
+                <div class="form-group">
+                    <label>1. Cài đặt đường link đăng ký/tham gia game đích</label>
+                    <input type="url" id="admin-target-url" placeholder="Ví dụ: https://xx88.com">
+                </div>
+                <div class="form-group" style="border-top: 1px solid #334155; padding-top: 16px;">
+                    <label style="color: #60a5fa;">⚙ CẤU HÌNH NÚT LIÊN HỆ HỖ TRỢ ĐỘNG</label>
+                    <div style="display: flex; gap: 8px; margin-top: 6px;">
+                        <input type="text" id="admin-support-text" placeholder="Tên nút (Ví dụ: Chăm Sóc Khách Hàng)" style="width: 40%;">
+                        <input type="url" id="admin-support-url" placeholder="Đường link hỗ trợ (Ví dụ: https://t.me)" style="width: 60%;">
+                    </div>
+                </div>
+                <div class="form-group" style="border-top: 1px solid #334155; padding-top: 16px;">
+                    <label>2. Tạo link tiếp thị / Mã định danh đại lý</label>
+                    <div class="flex-input">
+                        <input type="text" id="admin-ref-code" placeholder="Ví dụ: code1, dailyvip">
+                        <button id="btn-generate-ref" class="btn-admin">Kích Hoạt & Lưu cấu hình</button>
+                    </div>
+                    <div id="output-box" class="output-box">
+                        <span class="output-title">Link chia sẻ cho khách hàng:</span>
+                        <div id="output-link" class="output-link"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2026 XX88 Hệ Thống Kiểm Tra Live Tín Hiệu. All rights reserved.
+    </footer>
+    <script src="app.js"></script>
+</body>
+</html>
