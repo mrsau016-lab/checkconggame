@@ -182,6 +182,7 @@ if (document.getElementById('btn-close-admin')) {
 const inputTargetUrl = document.getElementById('admin-target-url');
 const inputSupportText = document.getElementById('admin-support-text');
 const inputSupportUrl = document.getElementById('admin-support-url');
+// ĐÃ VÁ LỖI: Định nghĩa biến ô nhập mã đại lý để hệ thống xử lý kích hoạt
 const inputRefCode = document.getElementById('admin-ref-code');
 const btnGenerateRef = document.getElementById('btn-generate-ref');
 const outputBox = document.getElementById('output-box');
@@ -209,7 +210,9 @@ if (btnGenerateRef) {
         adminConfig[refCode] = btoa(JSON.stringify(configPackage));
         localStorage.setItem('xx88_admin_config', JSON.stringify(adminConfig));
 
-        outputLink.innerText = `index.html?ref=${refCode}`;
+        // TỰ ĐỘNG LẤY LIÊN KẾT GITHUB PAGES ONLINE CỦA BẠN ĐỂ GHÉP LINK ĐỒNG BỘ CHUẨN XÁC
+        const currentUrl = window.location.href.split('?')[0];
+        outputLink.innerText = `${currentUrl}?ref=${refCode}`;
         outputBox.style.display = 'block';
         alert('Đã lưu và đồng bộ cấu hình thành công!');
     });
@@ -221,3 +224,4 @@ document.onkeydown = function(e) {
         return false;
     }
 };
+
