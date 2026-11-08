@@ -88,7 +88,7 @@ let gameStates = generateSmartGameStates();
 const gameGrid = document.getElementById('game-grid');
 const gridLockOverlay = document.getElementById('grid-lock-overlay');
 
-// HÀM ĐÃ SỬA: GỌI ẢNH TRỰC TIẾP TỪ THƯ MỤC GỐC CHỐNG LỖI ĐƯỜNG DẪN TRÊN GITHUB PAPES
+// HÀM ĐÃ SỬA: THUẬT TOÁN TỰ ĐỘNG KHỚP CẢ ĐUÔI .png VÀ .Png CHỐNG LỖI ẨN ẢNH ONLINE
 function updateAndRenderGrid() {
     gameStates.sort((a, b) => b.rate - a.rate);
     gameGrid.innerHTML = '';
@@ -96,11 +96,12 @@ function updateAndRenderGrid() {
         const card = document.createElement('div');
         card.className = "game-card";
         
-        // Gọi file ảnh nằm trực tiếp ngoài thư mục gốc để trình duyệt nhận diện ngay
+        // Cơ chế quét đa tầng: Thử tìm file đuôi .png viết thường, nếu lỗi tự chuyển sang đuôi .Png viết hoa chữ P
         card.innerHTML = `
             <div class="rank-badge">TOP ${index + 1}</div>
             <div class="img-container">
-                <img src="${game.name}.png" alt="${game.name}" onerror="this.style.display='none';">
+                <img src="${game.name}.png" alt="${game.name}" 
+                     onerror="this.onerror=null; this.src='${game.name}.Png'; this.addEventListener('error', function(){ this.style.display='none'; })}">
                 <div class="img-fallback">🎮 ${game.name}</div>
             </div>
             <div style="width: 100%;">
