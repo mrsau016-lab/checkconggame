@@ -88,7 +88,7 @@ let gameStates = generateSmartGameStates();
 const gameGrid = document.getElementById('game-grid');
 const gridLockOverlay = document.getElementById('grid-lock-overlay');
 
-// HÀM ĐÃ SỬA: THUẬT TOÁN QUÉT ĐA TẦNG THƯ MỤC CHỐNG LỆCH ĐƯỜNG DẪN TRÊN GITHUB
+// HÀM ĐÃ SỬA: GỌI ẢNH TRỰC TIẾP TỪ THƯ MỤC GỐC CHỐNG LỖI ĐƯỜNG DẪN TRÊN GITHUB PAPES
 function updateAndRenderGrid() {
     gameStates.sort((a, b) => b.rate - a.rate);
     gameGrid.innerHTML = '';
@@ -96,12 +96,11 @@ function updateAndRenderGrid() {
         const card = document.createElement('div');
         card.className = "game-card";
         
-        // Cơ chế tự động tìm ở "Anh/anh/", nếu lỗi tự chuyển sang "Anh/", lỗi tiếp sang "anh/"
+        // Gọi file ảnh nằm trực tiếp ngoài thư mục gốc để trình duyệt nhận diện ngay
         card.innerHTML = `
             <div class="rank-badge">TOP ${index + 1}</div>
             <div class="img-container">
-                <img src="Anh/anh/${game.name}.png" alt="${game.name}" 
-                     onerror="this.onerror=null; this.src='Anh/${game.name}.png'; this.addEventListener('error', function(){ this.onerror=null; this.src='anh/${game.name}.png'; })}">
+                <img src="${game.name}.png" alt="${game.name}" onerror="this.style.display='none';">
                 <div class="img-fallback">🎮 ${game.name}</div>
             </div>
             <div style="width: 100%;">
@@ -120,6 +119,7 @@ setInterval(() => {
     gameStates = generateSmartGameStates();
     if (gridLockOverlay && gridLockOverlay.style.display === 'none') { updateAndRenderGrid(); }
 }, 600000);
+
 let currentOnlineUsers = 3842;
 const statTextContainer = document.querySelector('.stats-banner .stat-item:nth-child(2)');
 setInterval(() => {
